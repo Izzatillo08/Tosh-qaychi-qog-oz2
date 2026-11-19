@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tosh, Qaychi, Qog'oz — O'yin va Reyting</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Asosiy shriftlar va kosmik o'yin foni */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, #0f172a 55%, #020617 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Orqa fondagi suzuvchi dekorativ nurlar (Ambient Background Glows) */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: 0;
+            pointer-events: none;
+            animation: floatOrb 14s ease-in-out infinite alternate;
+        }
+        .orb-1 {
+            width: 380px;
+            height: 380px;
+            background: rgba(99, 102, 241, 0.25);
+            top: -80px;
+            left: -80px;
+        }
+        .orb-2 {
+            width: 420px;
+            height: 420px;
+            background: rgba(236, 72, 153, 0.2);
+            bottom: -100px;
+            right: -60px;
+            animation-delay: -5s;
+        }
+        .orb-3 {
+            width: 280px;
+            height: 280px;
+            background: rgba(14, 165, 233, 0.2);
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -9s;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(35px, 25px) scale(1.1); }
+        }
+
+        /* Shishasimon (Glassmorphism) karta effekti */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.65);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Tanlov tugmalari uchun maxsus 3D ko'tarilish va porlash effekti */
+        .choice-btn {
+            background: linear-gradient(145deg, rgba(51, 65, 85, 0.75), rgba(15, 23, 42, 0.85));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+        }
+        .choice-btn:hover:not(:disabled) {
+            transform: translateY(-8px) scale(1.03);
+            border-color: rgba(129, 140, 248, 0.7);
+            box-shadow: 0 18px 30px -5px rgba(99, 102, 241, 0.4);
+        }
+        .choice-btn:active:not(:disabled) {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        /* Jang maydonidagi silkinish animatsiyasi (Tosh-Qaychi-Qog'oz zarbasi) */
+        @keyframes shakeLeft {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-22px) rotate(-14deg); }
+            50% { transform: translateY(6px) rotate(6deg); }
+            75% { transform: translateY(-18px) rotate(-10deg); }
+        }
+        @keyframes shakeRight {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-22px) rotate(14deg); }
+            50% { transform: translateY(6px) rotate(-6deg); }
+            75% { transform: translateY(-18px) rotate(10deg); }
+        }
+        .animate-shake-left {
+            animation: shakeLeft 0.55s ease-in-out;
+        }
+        .animate-shake-right {
+            animation: shakeRight 0.55s ease-in-out;
+        }
+
+        /* Natija paydo bo'lish animatsiyasi */
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop {
+            animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Maxsus skrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 sm:p-6 select-none">
+
+    <!-- Orqa fon bezaklari -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <!-- Xatoliklar va Bildirishnomalar uchun Toast Konteyneri -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Asosiy Veb Konteyner -->
+    <main class="relative z-10 w-full max-w-2xl">
+        
+        <!-- Yuqori Sarlavha (Header) -->
+        <header class="text-center mb-6">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold tracking-wider uppercase mb-3">
+                <span>⚡ Klassik Bellashuv</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent drop-shadow-sm">
+                TOSH, QAYCHI, QOG'OZ
+            </h1>
+            <p class="text-slate-400 text-sm sm:text-base mt-1.5">Omad va strategiya o'yini — natijalaringiz reytingda saqlanadi</p>
+        </header>
+
+        <!-- =========================================================
+             1-BO'LIM: ASOSIY MENYU (MAIN MENU)
+             ========================================================= -->
+        <section id="screen-menu" class="glass-card rounded-3xl p-6 sm:p-10 animate-pop">
+            <!-- Dekorativ 3 ta belgi ko'rgazmasi -->
+            <div class="flex justify-center items-center gap-4 sm:gap-7 mb-8">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/10 border border-amber-400/30 flex items-center justify-center shadow-lg transform -rotate-6">
+                    <div id="preview-rock" class="w-11 h-11 sm:w-14 sm:h-14"></div>
+                </div>
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-rose-500/10 border border-rose-400/30 flex items-center justify-center shadow-lg transform translate-y-2">
+                    <div id="preview-scissors" class="w-11 h-11 sm:w-14 sm:h-14"></div>
+                </div>
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-sky-500/10 border border-sky-400/30 flex items-center justify-center shadow-lg transform rotate-6">
+                    <div id="preview-paper" class="w-11 h-11 sm:w-14 sm:h-14"></div>
+                </div>
+            </div>
+
+            <div class="space-y-4 max-w-md mx-auto">
+                <button onclick="openNameScreen()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-lg shadow-lg shadow-indigo-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>1. O'yinni boshlash</span>
+                </button>
+
+                <button onclick="openLeaderboard()" class="w-full py-4 px-6 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 text-slate-100 font-semibold text-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 cursor-pointer">
+                    <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                    <span>2. Reytingni ko'rish</span>
+                </button>
+
+                <button onclick="openClearModal()" class="w-full py-3.5 px-6 rounded-2xl bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/30 text-rose-300 font-medium text-base transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span>3. Reytingni tozalash</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             2-BO'LIM: O'YINCHI ISMINI KIRITISH OYNASI
+             ========================================================= -->
+        <section id="screen-name" class="glass-card rounded-3xl p-6 sm:p-10 hidden animate-pop">
+            <div class="max-w-md mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">O'yinchini tanishtiring</h2>
+                <p class="text-slate-400 text-sm text-center mb-6">Natijalaringiz reyting jadvalida saqlanishi uchun ismingizni kiriting.</p>
+
+                <form id="player-form" onsubmit="handleStartGame(event)" novalidate>
+                    <div class="mb-5">
+                        <label for="player-name-input" class="block text-sm font-medium text-slate-300 mb-2">O'yinchi ismi</label>
+                        <input 
+                            type="text" 
+                            id="player-name-input" 
+                            maxlength="20"
+                            placeholder="Masalan: Jasurbek"
+                            autocomplete="off"
+                            class="w-full px-4 py-3.5 rounded-xl bg-slate-900/80 border border-slate-600/60 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 transition-all text-base"
+                        >
+                        <!-- Xatolik xabari maydoni -->
+                        <p id="name-error-msg" class="text-rose-400 text-xs mt-2 hidden flex items-center gap-1.5">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                            <span id="name-error-text">Ism bo'sh bo'lishi mumkin emas!</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button type="button" onclick="showScreen('screen-menu')" class="w-full sm:w-1/3 py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition-all cursor-pointer">
+                            Orqaga
+                        </button>
+                        <button type="submit" class="w-full sm:w-2/3 py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                            Jangni boshlash →
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             3-BO'LIM: ASOSIY O'YIN ARENASI (GAMEPLAY)
+             ========================================================= -->
+        <section id="screen-game" class="glass-card rounded-3xl p-5 sm:p-8 hidden animate-pop">
+            <!-- Yuqori panel: O'yinchi ismi va umumiy statistikasi -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-5 mb-6 border-b border-slate-700/60">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center font-bold text-indigo-300 text-lg" id="player-avatar">
+                        O
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">O'yinchi</p>
+                        <h3 id="display-player-name" class="font-bold text-lg text-white leading-tight">O'yinchi</h3>
+                    </div>
+                </div>
+
+                <!-- Joriy o'yinchi statistikasi -->
+                <div class="flex items-center gap-2 sm:gap-3 bg-slate-900/60 px-3.5 py-2 rounded-2xl border border-slate-700/50 text-xs sm:text-sm">
+                    <div class="text-center px-1.5">
+                        <span class="block text-emerald-400 font-bold text-base" id="stat-wins">0</span>
+                        <span class="text-slate-400 text-[11px]">G'alaba</span>
+                    </div>
+                    <div class="h-6 w-px bg-slate-700"></div>
+                    <div class="text-center px-1.5">
+                        <span class="block text-rose-400 font-bold text-base" id="stat-losses">0</span>
+                        <span class="text-slate-400 text-[11px]">Mag'lubiyat</span>
+                    </div>
+                    <div class="h-6 w-px bg-slate-700"></div>
+                    <div class="text-center px-1.5">
+                        <span class="block text-amber-300 font-bold text-base" id="stat-draws">0</span>
+                        <span class="text-slate-400 text-[11px]">Durang</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jang Maydoni (Siz vs Kompyuter) -->
+            <div class="bg-slate-950/50 rounded-2xl p-5 sm:p-7 border border-slate-800/80 mb-6 relative overflow-hidden">
+                <div class="grid grid-cols-3 items-center text-center gap-2">
+                    <!-- O'yinchi tomoni -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300 mb-3">Siz</span>
+                        <div id="arena-player-box" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-slate-800/70 border-2 border-indigo-500/30 flex items-center justify-center p-4 shadow-inner transition-all">
+                            <span class="text-slate-500 text-3xl font-bold">?</span>
+                        </div>
+                        <span id="arena-player-label" class="mt-2.5 text-sm font-medium text-slate-300 h-5">Tanlang...</span>
+                    </div>
+
+                    <!-- O'rtadagi VS belgisi -->
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="font-display font-black text-2xl sm:text-4xl bg-gradient-to-b from-slate-200 to-slate-500 bg-clip-text text-transparent">VS</span>
+                    </div>
+
+                    <!-- Kompyuter tomoni -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-pink-300 mb-3">Kompyuter</span>
+                        <div id="arena-cpu-box" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-slate-800/70 border-2 border-pink-500/30 flex items-center justify-center p-4 shadow-inner transition-all">
+                            <span class="text-slate-500 text-3xl font-bold">?</span>
+                        </div>
+                        <span id="arena-cpu-label" class="mt-2.5 text-sm font-medium text-slate-300 h-5">Kutilmoqda...</span>
+                    </div>
+                </div>
+
+                <!-- Raund Natijasi Banneri -->
+                <div id="round-result-banner" class="mt-5 py-2.5 px-4 rounded-xl text-center font-bold text-base sm:text-lg bg-slate-800/60 text-slate-300 border border-slate-700/50 transition-all">
+                    Quyidagi belgilardan birini tanlang!
+                </div>
+            </div>
+
+            <!-- 3 ta Asosiy Tanlov Tugmalari -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-5 mb-7">
+                <button onclick="playRound('Tosh')" id="btn-Tosh" class="choice-btn rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2.5 cursor-pointer group">
+                    <div id="icon-btn-Tosh" class="w-14 h-14 sm:w-20 sm:h-20 transition-transform group-hover:scale-110"></div>
+                    <span class="font-bold text-sm sm:text-base text-amber-300">Tosh</span>
+                </button>
+
+                <button onclick="playRound('Qaychi')" id="btn-Qaychi" class="choice-btn rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2.5 cursor-pointer group">
+                    <div id="icon-btn-Qaychi" class="w-14 h-14 sm:w-20 sm:h-20 transition-transform group-hover:scale-110"></div>
+                    <span class="font-bold text-sm sm:text-base text-rose-300">Qaychi</span>
+                </button>
+
+                <button onclick="playRound('Qog\'oz')" id="btn-Qogoz" class="choice-btn rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2.5 cursor-pointer group">
+                    <div id="icon-btn-Qogoz" class="w-14 h-14 sm:w-20 sm:h-20 transition-transform group-hover:scale-110"></div>
+                    <span class="font-bold text-sm sm:text-base text-sky-300">Qog'oz</span>
+                </button>
+            </div>
+
+            <!-- Pastki boshqaruv tugmalari -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-slate-700/60">
+                <button onclick="showScreen('screen-menu')" class="w-full sm:w-auto py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span>Asosiy menyuga qaytish</span>
+                </button>
+
+                <button onclick="openLeaderboard()" class="w-full sm:w-auto py-2.5 px-5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-300 text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🏆 Reyting jadvalini ko'rish</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             4-BO'LIM: REYTING JADVALI (LEADERBOARD)
+             ========================================================= -->
+        <section id="screen-leaderboard" class="glass-card rounded-3xl p-6 sm:p-8 hidden animate-pop">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold flex items-center gap-2.5">
+                        <span>🏆 O'yinchilar Reytingi</span>
+                    </h2>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-1">Eng ko'p g'alaba qozongan o'yinchilar ro'yxati</p>
+                </div>
+            </div>
+
+            <!-- Jadval konteyneri -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-700/60 bg-slate-900/50 mb-6">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/80 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-700/60">
+                            <th class="py-3.5 px-4">O'rin</th>
+                            <th class="py-3.5 px-4">Ism</th>
+                            <th class="py-3.5 px-4 text-center text-emerald-400">G'alaba</th>
+                            <th class="py-3.5 px-4 text-center text-rose-400">Mag'lubiyat</th>
+                            <th class="py-3.5 px-4 text-center text-amber-300">Durang</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y divide-slate-800/70 text-sm">
+                        <!-- JavaScript orqali to'ldiriladi -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between gap-3">
+                <button onclick="showScreen('screen-menu')" class="w-full sm:w-auto py-3 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition-all cursor-pointer">
+                    ← Asosiy menyuga qaytish
+                </button>
+                <button onclick="openClearModal()" class="w-full sm:w-auto py-3 px-5 rounded-xl bg-rose-950/50 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-sm font-medium transition-all cursor-pointer">
+                    Reytingni tozalash
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         REYTINGNI TOZALASH TASDIQLASH MODALI (Custom Modal)
+         ========================================================= -->
+    <div id="clear-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="glass-card rounded-3xl max-w-sm w-full p-6 sm:p-7 animate-pop border border-rose-500/30">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Reytingni tozalash</h3>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed">
+                Barcha o'yinchilarning saqlangan natijalarini butunlay o'chirishga ishonchingiz komilmi? Bu amalni ortga qaytarib bo'lmaydi.
+            </p>
+            <div class="flex gap-3">
+                <button onclick="closeClearModal()" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-all cursor-pointer">
+                    Yo'q, bekor qilish
+                </button>
+                <button onclick="confirmClearRatings()" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-lg shadow-rose-600/30 transition-all cursor-pointer">
+                    Ha, o'chirish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         JAVASCRIPT MANTIQI (Xatolarni ushlash va O'yin tizimi)
+         ========================================================= -->
+    <script>
+        // Saqlash kaliti
+        const STORAGE_KEY = 'tosh_qaychi_qogoz_reyting_v1';
+
+        // O'yin holati (State)
+        let currentPlayer = '';
+        let ratingsData = {};
+        let isAnimating = false;
+
+        // =========================================================
+        // MAXSUS VEKTORLI (SVG) RASMLAR (Tosh, Qaychi, Qog'oz)
+        // =========================================================
+        const SVG_ICONS = {
+            'Tosh': `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="rockGrad" x1="15" y1="15" x2="85" y2="85" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#FBBF24"/>
+                            <stop offset="50%" stop-color="#D97706"/>
+                            <stop offset="100%" stop-color="#78350F"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M26 32C32 18 52 14 68 21C82 27 89 44 85 60C81 76 66 86 48 85C30 84 15 73 14 56C13 43 20 44 26 32Z" fill="url(#rockGrad)" stroke="#FDE68A" stroke-width="3"/>
+                    <path d="M32 34C40 26 55 25 65 31" stroke="#FEF3C7" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
+                    <path d="M55 58L66 52M42 68L54 66" stroke="#451A03" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+                    <circle cx="34" cy="52" r="3" fill="#451A03" opacity="0.35"/>
+                </svg>
+            `,
+            'Qaychi': `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="bladeGrad" x1="20" y1="15" x2="80" y2="65" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#F8FAFC"/>
+                            <stop offset="100%" stop-color="#94A3B8"/>
+                        </linearGradient>
+                        <linearGradient id="handleGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#FB7185"/>
+                            <stop offset="100%" stop-color="#BE123C"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Tig'lar -->
+                    <path d="M28 16L62 58L53 63L22 24C20 21 24 14 28 16Z" fill="url(#bladeGrad)" stroke="#E2E8F0" stroke-width="2"/>
+                    <path d="M72 16L38 58L47 63L78 24C80 21 76 14 72 16Z" fill="url(#bladeGrad)" stroke="#E2E8F0" stroke-width="2"/>
+                    <!-- Tutqich halqalari -->
+                    <circle cx="33" cy="74" r="13" stroke="url(#handleGrad)" stroke-width="7" fill="rgba(244,63,94,0.15)"/>
+                    <circle cx="67" cy="74" r="13" stroke="url(#handleGrad)" stroke-width="7" fill="rgba(244,63,94,0.15)"/>
+                    <!-- O'rtadagi mix -->
+                    <circle cx="50" cy="48" r="4" fill="#F43F5E" stroke="#FFF" stroke-width="1.5"/>
+                </svg>
+            `,
+            "Qog'oz": `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="paperGrad" x1="20" y1="12" x2="80" y2="88" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#E0F2FE"/>
+                            <stop offset="60%" stop-color="#7DD3FC"/>
+                            <stop offset="100%" stop-color="#0284C7"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M24 16C24 13.7909 25.7909 12 28 12H60L78 30V84C78 86.2091 76.2091 88 74 88H28C25.7909 88 24 86.2091 24 84V16Z" fill="url(#paperGrad)" stroke="#BAE6FD" stroke-width="2.5"/>
+                    <path d="M60 12V26C60 28.2091 61.7909 30 64 30H78" fill="#0369A1" opacity="0.45"/>
+                    <line x1="34" y1="42" x2="66" y2="42" stroke="#0C4A6E" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>
+                    <line x1="34" y1="54" x2="66" y2="54" stroke="#0C4A6E" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>
+                    <line x1="34" y1="66" x2="54" y2="66" stroke="#0C4A6E" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>
+                </svg>
+            `
+        };
+
+        // =========================================================
+        // XATOLARNI USHLASH BILAN XOTIRANI BOSHQARISH (localStorage)
+        // =========================================================
+        function loadRatingsSafely() {
+            try {
+                const rawData = localStorage.getItem(STORAGE_KEY);
+                if (!rawData) {
+                    return {};
+                }
+                const parsed = JSON.parse(rawData);
+                // Obyekt ekanligini tekshirish
+                if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+                    throw new Error("Reyting ma'lumotlari formati buzilgan.");
+                }
+                return parsed;
+            } catch (error) {
+                console.error("Reytingni o'qishda xatolik:", error);
+                showToast("Ogohlantirish: Reyting xotirasi buzilgan ekan, yangi jadval yaratildi.", "warning");
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (e) { /* e'tiborsiz qoldirish */ }
+                return {};
+            }
+        }
+
+        function saveRatingsSafely(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error("Reytingni saqlashda xatolik:", error);
+                showToast("Xatolik: Brauzer xotirasiga reytingni saqlab bo'lmadi!", "error");
+                return false;
+            }
+        }
+
+        // =========================================================
+        // BILDIRISHNOMA (TOAST) TIZIMI (alert o'rniga)
+        // =========================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const styles = {
+                success: 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200',
+                error: 'bg-rose-950/90 border-rose-500/50 text-rose-200',
+                warning: 'bg-amber-950/90 border-amber-500/50 text-amber-200',
+                info: 'bg-slate-900/90 border-indigo-500/50 text-indigo-200'
+            };
+
+            toast.className = `pointer-events-auto px-4 py-3.5 rounded-2xl border backdrop-blur-md shadow-xl text-sm font-medium flex items-center justify-between gap-3 animate-pop ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white text-lg leading-none cursor-pointer">&times;</button>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        // =========================================================
+        // EKRANLAR ORASIDA O'TISH (NAVIGATION)
+        // =========================================================
+        function showScreen(screenId) {
+            const screens = ['screen-menu', 'screen-name', 'screen-game', 'screen-leaderboard'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === screenId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+
+        function openNameScreen() {
+            const input = document.getElementById('player-name-input');
+            const errorMsg = document.getElementById('name-error-msg');
+            errorMsg.classList.add('hidden');
+            input.value = currentPlayer || '';
+            showScreen('screen-name');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        // =========================================================
+        // O'YINNI BOSHLASH VA ISMNI TEKSHIRISH (VALIDATION)
+        // =========================================================
+        function handleStartGame(event) {
+            event.preventDefault();
+            const input = document.getElementById('player-name-input');
+            const errorMsg = document.getElementById('name-error-msg');
+            const errorText = document.getElementById('name-error-text');
+            
+            // Xavfsiz tozalash (XSS oldini olish va bo'sh joylarni olib tashlash)
+            const rawName = input.value.trim().replace(/[<>]/g, '');
+
+            if (!rawName) {
+                errorText.textContent = "Xato: Ism bo'sh bo'lishi mumkin emas! Iltimos, ismingizni kiriting.";
+                errorMsg.classList.remove('hidden');
+                input.focus();
+                return;
+            }
+
+            if (rawName.length < 2) {
+                errorText.textContent = "Xato: Ism kamida 2 ta harfdan iborat bo'lishi kerak.";
+                errorMsg.classList.remove('hidden');
+                input.focus();
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            currentPlayer = rawName;
+
+            // Agar o'yinchi bazada bo'lmasa, yangi profil ochish
+            if (!ratingsData[currentPlayer]) {
+                ratingsData[currentPlayer] = { galaba: 0, maglubiyat: 0, durang: 0 };
+                saveRatingsSafely(ratingsData);
+            }
+
+            // O'yin oynasini tayyorlash
+            document.getElementById('display-player-name').textContent = currentPlayer;
+            document.getElementById('player-avatar').textContent = currentPlayer.charAt(0).toUpperCase();
+            updatePlayerStatsUI();
+            resetArenaUI();
+            showScreen('screen-game');
+        }
+
+        function updatePlayerStatsUI() {
+            const stats = ratingsData[currentPlayer] || { galaba: 0, maglubiyat: 0, durang: 0 };
+            document.getElementById('stat-wins').textContent = stats.galaba;
+            document.getElementById('stat-losses').textContent = stats.maglubiyat;
+            document.getElementById('stat-draws').textContent = stats.durang;
+        }
+
+        function resetArenaUI() {
+            document.getElementById('arena-player-box').innerHTML = `<span class="text-slate-500 text-3xl font-bold">?</span>`;
+            document.getElementById('arena-cpu-box').innerHTML = `<span class="text-slate-500 text-3xl font-bold">?</span>`;
+            document.getElementById('arena-player-label').textContent = "Tanlang...";
+            document.getElementById('arena-cpu-label').textContent = "Kutilmoqda...";
+            
+            const banner = document.getElementById('round-result-banner');
+            banner.className = "mt-5 py-2.5 px-4 rounded-xl text-center font-bold text-base sm:text-lg bg-slate-800/60 text-slate-300 border border-slate-700/50 transition-all";
+            banner.textContent = "Quyidagi belgilardan birini tanlang!";
+        }
+
+        // =========================================================
+        // ASOSIY O'YIN RAUNDI MANTIQI
+        // =========================================================
+        function playRound(playerChoice) {
+            if (isAnimating) return;
+
+            const choices = ['Tosh', 'Qaychi', "Qog'oz"];
+            if (!choices.includes(playerChoice)) {
+                showToast("Noto'g'ri tanlov amalga oshirildi!", "error");
+                return;
+            }
+
+            isAnimating = true;
+            setChoiceButtonsDisabled(true);
+
+            const playerBox = document.getElementById('arena-player-box');
+            const cpuBox = document.getElementById('arena-cpu-box');
+            const banner = document.getElementById('round-result-banner');
+
+            // Silkinish vaqtida musht (Tosh) ko'rsatib turish
+            playerBox.innerHTML = `<div class="w-16 h-16 sm:w-20 sm:h-20">${SVG_ICONS['Tosh']}</div>`;
+            cpuBox.innerHTML = `<div class="w-16 h-16 sm:w-20 sm:h-20 transform scale-x-[-1]">${SVG_ICONS['Tosh']}</div>`;
+            
+            document.getElementById('arena-player-label').textContent = "Tayyorlanmoqda...";
+            document.getElementById('arena-cpu-label').textContent = "O'ylamoqda...";
+            banner.className = "mt-5 py-2.5 px-4 rounded-xl text-center font-bold text-base sm:text-lg bg-indigo-950/60 text-indigo-300 border border-indigo-500/30";
+            banner.textContent = "Tosh... Qaychi... Qog'oz!";
+
+            playerBox.classList.add('animate-shake-left');
+            cpuBox.classList.add('animate-shake-right');
+
+            setTimeout(() => {
+                playerBox.classList.remove('animate-shake-left');
+                cpuBox.classList.remove('animate-shake-right');
+
+                const cpuChoice = choices[Math.floor(Math.random() * choices.length)];
+
+                // Haqiqiy tanlovlarni ko'rsatish
+                playerBox.innerHTML = `<div class="w-16 h-16 sm:w-22 sm:h-22 animate-pop">${SVG_ICONS[playerChoice]}</div>`;
+                cpuBox.innerHTML = `<div class="w-16 h-16 sm:w-22 sm:h-22 animate-pop">${SVG_ICONS[cpuChoice]}</div>`;
+                
+                document.getElementById('arena-player-label').textContent = playerChoice;
+                document.getElementById('arena-cpu-label').textContent = cpuChoice;
+
+                // G'olibni aniqlash
+                if (playerChoice === cpuChoice) {
+                    ratingsData[currentPlayer].durang += 1;
+                    banner.className = "mt-5 py-2.5 px-4 rounded-xl text-center font-bold text-base sm:text-lg bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pop";
+                    banner.textContent = "🤝 Natija: Durang!";
+                } else if (
+                    (playerChoice === 'Tosh' && cpuChoice === 'Qaychi') ||
+                    (playerChoice === 'Qaychi' && cpuChoice === "Qog'oz") ||
+                    (playerChoice === "Qog'oz" && cpuChoice === 'Tosh')
+                ) {
+                    ratingsData[currentPlayer].galaba += 1;
+                    banner.className = "mt-5 py-2.5 px-4 rounded-xl text-center font-bold text-base sm:text-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 animate-pop";
+                    banner.textContent = "🎉 Natija: Siz g'alaba qozondingiz!";
+                } else {
+                    ratingsData[currentPlayer].maglubiyat += 1;
+                    banner.className = "mt-5 py-2.5 px-4 rounded-xl text-center font-bold text-base sm:text-lg bg-rose-500/20 text-rose-300 border border-rose-400/40 animate-pop";
+                    banner.textContent = "💻 Natija: Kompyuter g'alaba qozondi!";
+                }
+
+                // Har bir raunddan keyin avtomatik saqlash
+                saveRatingsSafely(ratingsData);
+                updatePlayerStatsUI();
+
+                isAnimating = false;
+                setChoiceButtonsDisabled(false);
+            }, 560);
+        }
+
+        function setChoiceButtonsDisabled(disabled) {
+            ['btn-Tosh', 'btn-Qaychi', 'btn-Qogoz'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = disabled;
+            });
+        }
+
+        // =========================================================
+        // REYTING JADVALINI CHIQARISH VA SARALASH
+        // =========================================================
+        function openLeaderboard() {
+            ratingsData = loadRatingsSafely();
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            const entries = Object.entries(ratingsData);
+
+            if (entries.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-10 px-4 text-center text-slate-400">
+                            <p class="text-base font-medium mb-1">Hozircha reytingda hech kim yo'q.</p>
+                            <p class="text-xs text-slate-500">Birinchi bo'lib o'yinni boshlang va rekord o'rnating!</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // G'alabalar soni bo'yicha kamayish tartibida saralash
+                entries.sort((a, b) => b[1].galaba - a[1].galaba);
+
+                entries.forEach(([name, stats], index) => {
+                    const rank = index + 1;
+                    let rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs">${rank}</span>`;
+                    
+                    if (rank === 1) {
+                        rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-400/50 text-amber-300 font-bold text-xs">🥇 1</span>`;
+                    } else if (rank === 2) {
+                        rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-300/20 border border-slate-300/40 text-slate-200 font-bold text-xs">🥈 2</span>`;
+                    } else if (rank === 3) {
+                        rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-orange-600/20 border border-orange-400/40 text-orange-300 font-bold text-xs">🥉 3</span>`;
+                    }
+
+                    const isCurrentUser = name === currentPlayer;
+                    const row = document.createElement('tr');
+                    row.className = isCurrentUser ? 'bg-indigo-500/10' : 'hover:bg-slate-800/40 transition-colors';
+                    
+                    row.innerHTML = `
+                        <td class="py-3.5 px-4">${rankBadge}</td>
+                        <td class="py-3.5 px-4 font-semibold text-white">
+                            ${escapeHTML(name)}
+                            ${isCurrentUser ? '<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300">Siz</span>' : ''}
+                        </td>
+                        <td class="py-3.5 px-4 text-center font-bold text-emerald-400">${stats.galaba || 0}</td>
+                        <td class="py-3.5 px-4 text-center font-medium text-rose-400">${stats.maglubiyat || 0}</td>
+                        <td class="py-3.5 px-4 text-center font-medium text-amber-300">${stats.durang || 0}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            showScreen('screen-leaderboard');
+        }
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // =========================================================
+        // REYTINGNI TOZALASH MODALI
+        // =========================================================
+        function openClearModal() {
+            const modal = document.getElementById('clear-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeClearModal() {
+            const modal = document.getElementById('clear-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmClearRatings() {
+            ratingsData = {};
+            saveRatingsSafely(ratingsData);
+            if (currentPlayer) {
+                ratingsData[currentPlayer] = { galaba: 0, maglubiyat: 0, durang: 0 };
+                saveRatingsSafely(ratingsData);
+                updatePlayerStatsUI();
+            }
+            closeClearModal();
+            showToast("Reyting ma'lumotlari muvaffaqiyatli tozalandi.", "success");
+            
+            // Agar reyting oynasi ochiq bo'lsa, uni yangilash
+            if (!document.getElementById('screen-leaderboard').classList.contains('hidden')) {
+                openLeaderboard();
+            }
+        }
+
+        // =========================================================
+        // DASTUR ISHGA TUSHGANDA BARCHA IKONKALARNI YUKLASH
+        // =========================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            ratingsData = loadRatingsSafely();
+
+            // Menyu va o'yin tugmalariga SVG rasmlarni joylash
+            document.getElementById('preview-rock').innerHTML = SVG_ICONS['Tosh'];
+            document.getElementById('preview-scissors').innerHTML = SVG_ICONS['Qaychi'];
+            document.getElementById('preview-paper').innerHTML = SVG_ICONS["Qog'oz"];
+
+            document.getElementById('icon-btn-Tosh').innerHTML = SVG_ICONS['Tosh'];
+            document.getElementById('icon-btn-Qaychi').innerHTML = SVG_ICONS['Qaychi'];
+            document.getElementById('icon-btn-Qogoz').innerHTML = SVG_ICONS["Qog'oz"];
+        });
+    </script>
+</body>
+</html>
